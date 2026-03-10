@@ -1,3 +1,5 @@
+import UserModel from '../models/UserModel';
+
 let Users = [
   {
     'nome': 'eliabe',
@@ -27,8 +29,12 @@ let Users = [
 
 class UserController {
 
-  create() {
-    
+  async create(req, res) {
+    const data = req.body;
+    const newUser =  await UserModel.create(data);
+
+    res.status(201).json(newUser);
+
   }
 
   read(req, res) {

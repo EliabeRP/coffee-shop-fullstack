@@ -1,6 +1,7 @@
 import express from 'express';
-import userRoutes from './src/routes/UserRoutes'
-import dotenv from 'dotenv'
+import userRoutes from './src/routes/UserRoutes';
+import database from './src/database';
+import dotenv from 'dotenv';
 dotenv.config();
 
 class App {

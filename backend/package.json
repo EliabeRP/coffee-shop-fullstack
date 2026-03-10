@@ -12,10 +12,14 @@
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^3.1.14",
+    "sequelize-cli": "^6.6.5",
     "sucrase": "^3.35.1"
   },
   "dependencies": {
     "dotenv": "^17.3.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "pg": "^8.20.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.8"
   }
 }
