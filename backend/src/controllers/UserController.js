@@ -43,6 +43,13 @@ class UserController {
 
     res.status(200).json(users);
   }
+
+  async readOne(req, res){
+    const {id} = req.params;
+    const user = await UserModel.findByPk(id, {attributes: ['name' ,'age', 'email', 'role']})
+
+    res.status(200).json(user)
+  }
   
   update () {
     
