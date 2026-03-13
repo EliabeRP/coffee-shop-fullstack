@@ -10,5 +10,6 @@ router.get('/user/:id',UserController.readOne);
 
 router.post('/user', UserController.create);
 
+router.put('/user/:id', UserController.update);
 
 export default router;

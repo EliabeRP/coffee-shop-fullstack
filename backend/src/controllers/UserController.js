@@ -51,8 +51,12 @@ class UserController {
     res.status(200).json(user)
   }
   
-  update () {
-    
+  async update (req, res){
+    const {id} = req.params;
+    const user = req.body;
+    await UserModel.update(user, {where: {id}})
+
+    res.status(200).json({name:user.name,age:user.age,email:user.email,role:user.role});
   }
   delete(){
     
