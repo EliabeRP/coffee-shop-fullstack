@@ -19,20 +19,16 @@ module.exports = {
       email: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true,
       },
 
-      password: {
+      password_hash: {
         type: Sequelize.STRING,
-        allowNull: false,
-      },
-
-      age: {
-        type: Sequelize.INTEGER,
         allowNull: false,
       },
 
       role: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('admin', 'client'),
         allowNull: false,
       },
 

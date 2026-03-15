@@ -16,6 +16,7 @@
     "sucrase": "^3.35.1"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "pg": "^8.20.0",

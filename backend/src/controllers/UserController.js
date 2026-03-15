@@ -6,12 +6,12 @@ class UserController {
     const data = req.body;
     const newUser =  await UserModel.create(data);
 
-    res.status(201).json({name:newUser.name,age:newUser.age,email:newUser.email,role:newUser.role});
+    res.status(201).json({name:newUser.name,email:newUser.email,role:newUser.role});
 
   }
 
   async read(req, res) {
-    const users = await UserModel.findAll({attributes: ['id', 'name' ,'age', 'email', 'role']});
+    const users = await UserModel.findAll({attributes: ['id', 'name', 'email', 'role']});
 
 
     res.status(200).json(users);
@@ -19,7 +19,7 @@ class UserController {
 
   async readOne(req, res){
     const {id} = req.params;
-    const user = await UserModel.findByPk(id, {attributes: ['id', 'name' ,'age', 'email', 'role']});
+    const user = await UserModel.findByPk(id, {attributes: ['id', 'name', 'email', 'role']});
 
     res.status(200).json(user)
   }
@@ -29,7 +29,7 @@ class UserController {
     const user = req.body;
     await UserModel.update(user, {where: {id}});
 
-    res.status(200).json({name:user.name,age:user.age,email:user.email,role:user.role});
+    res.status(200).json({name:user.name,email:user.email,role:user.role});
   }
 
   async delete(req, res){
