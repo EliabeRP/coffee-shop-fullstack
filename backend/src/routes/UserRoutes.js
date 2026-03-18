@@ -1,17 +1,17 @@
 import { Router } from 'express';
 import UserController from '../controllers/UserController'
-import User from '../models/UserModel';
+import auth from '../middlewares/AuthMiddleware';
 
 const router = new Router();
 
-router.get('/user', UserController.read);
+router.get('/user',  auth.authAdmin, UserController.read);
 
-router.get('/user/:id',UserController.readOne);
+router.get('/user/:id', auth.authClient, UserController.readOne);
 
 router.post('/user', UserController.create);
 
-router.put('/user/:id', UserController.update);
+router.put('/user/:id', auth.authClient, UserController.update);
 
-router.delete('/user/:id', UserController.delete);
+router.delete('/user/:id',auth.authAdmin, UserController.delete);
 
 export default router;
