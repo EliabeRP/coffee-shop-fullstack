@@ -39,9 +39,13 @@ class UserController {
     try {
       const {id} = req.params;
       const user = req.body;
-      await UserModel.update(user, {where: {id}});
-      res.status(200).json({name:user.name,email:user.email,role:user.role});
-    }catch(err){
+      const userId = req.user.id;
+      const userRole = req.user.role;
+      if (id != userId && userRole != 'admin') return res.status(403).json({ message: 'Você não possui a permissão para alterar informações de outros usuários.' })
+        await UserModel.update(user, {where: {id}});
+        res.status(200).json({name:user.name,email:user.email,role:user.role});
+      }
+    catch(err){
       res.status(400).json({errors:err.errors.map(er=>er.message)})
     }
   }
