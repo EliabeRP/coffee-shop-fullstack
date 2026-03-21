@@ -38,12 +38,17 @@ class UserController {
   async update (req, res){
     try {
       const {id} = req.params;
-      const user = req.body;
+      const userAtt = req.body;
       const userId = req.user.id;
       const userRole = req.user.role;
       if (id != userId && userRole != 'admin') return res.status(403).json({ message: 'Você não possui a permissão para alterar informações de outros usuários.' })
-        await UserModel.update(user, {where: {id}});
-        res.status(200).json({name:user.name,email:user.email,role:user.role});
+        const user = await UserModel.findByPk(id);
+
+        if (!user) return res.status(400).json({message: 'Usuário não existe'});
+      
+        await UserModel.update(userAtt, {where: {id}});
+
+        res.status(200).json({name:userAtt.name,email:userAtt.email,role:userAtt.role});
       }
     catch(err){
       res.status(400).json({errors:err.errors.map(er=>er.message)})
@@ -57,6 +62,7 @@ class UserController {
 
     res.status(200)
   }
+
 }
 
 
