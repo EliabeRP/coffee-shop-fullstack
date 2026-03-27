@@ -3,6 +3,7 @@ import userRoutes from './src/routes/UserRoutes';
 import Login from './src/routes/index';
 import database from './src/database';
 import dotenv from 'dotenv';
+import productRoutes from './src/routes/ProductRoutes';
 dotenv.config();
 
 class App {
@@ -19,6 +20,7 @@ class App {
   routes() {
     this.app.use(Login);
     this.app.use(userRoutes);
+    this.app.use(productRoutes);
   }
 }
 
