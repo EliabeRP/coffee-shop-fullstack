@@ -1,7 +1,6 @@
-import { DataTypes } from 'sequelize';
-import database from '../database';
+import Sequelize, { Model, DataTypes } from 'sequelize';
 
-class Order extends database.Sequelize.Model {
+export default class Order extends Model {
   static init(sequelize) {
     super.init(
       {
@@ -39,4 +38,3 @@ class Order extends database.Sequelize.Model {
   }
 }
 
-export default Order;
