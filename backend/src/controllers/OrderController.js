@@ -1,18 +1,59 @@
 import OrderModel from '../models/OrderModel';
+import ProductModel from '../models/ProductModel';
 
 class OrderController {
   
   async create (req, res) {
-    try{
+    try {
       const data = req.body;
       const userId = req.user.id;
-      if (data.id_user != userId) return res.status(403).json({ message: 'Você não possui a permissão para criar pedidos para outros usuários.' });
-      const totalPrice = data.products.reduce((total, item) => total + (item.price * item.quantidade), 0);
+
+      if (data.id_user != userId) {
+        return res.status(403).json({ message: 'Você não possui permissão para criar pedidos para outros usuários.' });
+      }
+
+      const productIds = data.products.map(p => p.id);
+
+      const products = await ProductModel.findAll({
+        where: { id: productIds },
+        attributes: ['id', 'price']
+      });
+
+      if (products.length !== data.products.length) {
+        const foundIds = products.map(p => String(p.id));
+        const missingIds = data.products
+          .filter(item => !foundIds.includes(String(item.id)))
+          .map(item => item.id);
+
+        return res.status(404).json({ 
+          message: 'Alguns produtos não foram encontrados.',
+          ids_invalidos: missingIds 
+        });
+      }
+
+      const totalPrice = data.products.reduce((total, item) => {
+        const product = products.find(p => String(p.id) === String(item.id));
+        
+        if (product) {
+          const price = parseFloat(product.price);
+          const qtd = parseInt(item.quantidade);
+          
+          return total + (price * qtd);
+        }
+        
+        return total;
+      }, 0);
+
       data.total_price = totalPrice;
-      await OrderModel.create(data);
-      res.status(201).json({message: 'Pedido criado com sucesso.'});
-    }catch(err){
-      return res.status(400).json({errors:err.errors.map(er=>er.message)});
+
+      const newOrder = await OrderModel.create(data);
+
+      res.status(201).json({ 
+        message: 'Pedido criado com sucesso.',
+        total_calculado: totalPrice 
+      });
+    } catch (err) {
+      res.status(400).json({errors:err.errors.map(er=>er.message)});
     }
   }
 
@@ -25,41 +66,41 @@ class OrderController {
     const {id} = req.params;
     const userId = req.user.id;
     const userRole = req.user.role;
-    const product = await OrderModel.findByPk(id, {attributes: ['id', 'id_user', 'products', 'total_price']});
-    if (product.id_user != userId && userRole != 'admin') return res.status(403).json({ message: 'Você não possui a permissão para acessar informações de outros usuários.' });
-    if(!product){
+    const order = await OrderModel.findByPk(id, {attributes: ['id', 'id_user', 'products', 'total_price']});
+    if(!order){
       return res.status(400).json({message: "Pedido não existe."});
     }
-    return res.status(200).json(product)
+    if (order.id_user != userId && userRole != 'admin') return res.status(403).json({ message: 'Você não possui a permissão para acessar informações de outros usuários.' });  
+    return res.status(200).json(order)
   }
     
-    async update (req, res){
-      try {
-          const {id} = req.params;
-          const orderAtt = req.body;
-          const userId = req.user.id;
-          const userRole = req.user.role;
-          const order = await OrderModel.findByPk(id);
-          if (order.id_user != userId && userRole != 'admin') return res.status(403).json({ message: 'Você não possui a permissão para alterar informações de outros usuários.' });
-  
-          if (!order) return res.status(400).json({message: 'Pedido não existe'});
-        
-          await OrderModel.update(orderAtt, {where: {id}});
-  
-          res.status(200).json({message: 'Pedido atualizado com sucesso.'});
-        }
-      catch(err){
-          res.status(400).json({errors:err.errors.map(er=>er.message)})
+  async update (req, res){
+    try {
+        const {id} = req.params;
+        const orderAtt = req.body;
+        const userId = req.user.id;
+        const userRole = req.user.role;
+        const order = await OrderModel.findByPk(id);
+        if (!order) return res.status(400).json({message: 'Pedido não existe'});
+
+        if (order.id_user != userId && userRole != 'admin') return res.status(403).json({ message: 'Você não possui a permissão para alterar informações de outros usuários.' });
+
+        await OrderModel.update(orderAtt, {where: {id}});
+
+        res.status(200).json({message: 'Pedido atualizado com sucesso.'});
       }
+    catch(err){
+        res.status(400).json({errors:err.errors.map(er=>er.message)})
     }
-  
-    async delete(req, res){
-      const { id } = req.params;
-  
-      await OrderModel.destroy({ where: { id }});
-  
-      res.status(200).json({message: 'Pedido deletado com sucesso.'})
-    }
+  }
+
+  async delete(req, res){
+    const { id } = req.params;
+
+    await OrderModel.destroy({ where: { id }});
+
+    res.status(200).json({message: 'Pedido deletado com sucesso.'})
+  }
 
 }
 
