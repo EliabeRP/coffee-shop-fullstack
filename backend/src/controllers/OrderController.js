@@ -133,6 +133,14 @@ class OrderController {
   async delete(req, res){
     const { id } = req.params;
 
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    const order = await OrderModel.findByPk(id);
+    if (!order) return res.status(400).json({message: 'Pedido não existe.'});
+
+    if (order.id_user != userId && userRole != 'admin') return res.status(403).json({ message: 'Você não possui permissão para deletar pedidos para outros usuários.' });
+
     await OrderModel.destroy({ where: { id }});
 
     res.status(200).json({message: 'Pedido deletado com sucesso.'})
