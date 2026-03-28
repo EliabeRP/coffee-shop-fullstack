@@ -79,18 +79,54 @@ class OrderController {
         const {id} = req.params;
         const orderAtt = req.body;
         const userId = req.user.id;
-        const userRole = req.user.role;
+
+        if (orderAtt.id_user != userId) return res.status(403).json({ message: 'Você não possui permissão para transferir pedidos para outros usuários.' });
+
         const order = await OrderModel.findByPk(id);
         if (!order) return res.status(400).json({message: 'Pedido não existe'});
 
-        if (order.id_user != userId && userRole != 'admin') return res.status(403).json({ message: 'Você não possui a permissão para alterar informações de outros usuários.' });
+        if (order.id_user != userId) return res.status(403).json({ message: 'Você não possui a permissão para alterar informações de outros usuários.' });
+
+        const productIds = orderAtt.products.map(p => p.id);
+
+        const products = await ProductModel.findAll({
+          where: { id: productIds },
+          attributes: ['id', 'price']
+        });
+
+        if (products.length !== orderAtt.products.length) {
+          const foundIds = products.map(p => String(p.id));
+          const missingIds = orderAtt.products
+            .filter(item => !foundIds.includes(String(item.id)))
+            .map(item => item.id);
+
+          return res.status(404).json({ 
+            message: 'Alguns produtos não foram encontrados.',
+            ids_invalidos: missingIds 
+          });
+        }
+
+        const totalPrice = orderAtt.products.reduce((total, item) => {
+          const product = products.find(p => String(p.id) === String(item.id));
+          
+          if (product) {
+            const price = parseFloat(product.price);
+            const qtd = parseInt(item.quantidade);
+            
+            return total + (price * qtd);
+          }
+          
+          return total;
+        }, 0);
+
+        orderAtt.total_price = totalPrice;
 
         await OrderModel.update(orderAtt, {where: {id}});
 
         res.status(200).json({message: 'Pedido atualizado com sucesso.'});
       }
     catch(err){
-        res.status(400).json({errors:err.errors.map(er=>er.message)})
+        res.status(400).json({errors:err.errors.map(er=>er.message)});
     }
   }
 
