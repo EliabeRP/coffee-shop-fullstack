@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { Form, Button, Card, Container } from "react-bootstrap";
-import { Link } from "react-router-dom";
 
-function Login() {
+function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [name, setName] = useState("");
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Handle login logic here
+        // Handle registration logic here
     };
 
     return (
@@ -19,8 +20,18 @@ function Login() {
         >
             <Card className="shadow-sm" style={{ width: "100%", maxWidth: "420px" }}>
                 <Card.Body>
-                    <Card.Title className="mb-4 text-center">Login</Card.Title>
+                    <Card.Title className="mb-4 text-center">Registro</Card.Title>
                     <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3" controlId="formBasicName">
+                            <Form.Label>Nome Completo</Form.Label>
+                            <Form.Control
+                                value={name}
+                                onChange={(element) => setName(element.target.value)}
+                                type="text"
+                                placeholder="Digite seu nome completo"
+                            />
+                        </Form.Group>
+
                         <Form.Group className="mb-3" controlId="formBasicEmail">
                             <Form.Label>Endereço de Email</Form.Label>
                             <Form.Control
@@ -44,16 +55,23 @@ function Login() {
                             />
                         </Form.Group>
 
+                        <Form.Group className="mb-3" controlId="formBasicConfirmPassword">
+                            <Form.Label>Confirmar Senha</Form.Label>
+                            <Form.Control
+                                value={confirmPassword}
+                                onChange={(element) => setConfirmPassword(element.target.value)}
+                                type="password"
+                                placeholder="Confirme sua senha"
+                            />
+                        </Form.Group>
+
                         <Button
                             type="submit"
                             className="w-100 border-0"
                             style={{ backgroundColor: "#D2691E" }}
                         >
-                            Entrar
+                            Registrar
                         </Button>
-                        <Link to="/register" className="d-block text-center mt-3">
-                            Não tem uma conta? Registre-se aqui
-                        </Link>
                     </Form>
                 </Card.Body>
             </Card>
@@ -61,4 +79,4 @@ function Login() {
     );
 }
 
-export default Login;
+export default Register;
