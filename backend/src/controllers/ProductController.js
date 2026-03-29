@@ -6,21 +6,21 @@ class ProductController {
     try{
       const data = req.body;
       const newProduct =  await ProductModel.create(data);
-      res.status(201).json({name:newProduct.name,price:newProduct.price,description:newProduct.description,quantity:newProduct.quantity});
+      res.status(201).json({id: newProduct.id, name:newProduct.name, price:newProduct.price, description:newProduct.description, quantity:newProduct.quantity, image: newProduct.image});
     }catch(err){
       res.status(400).json({errors:err.errors.map(er=>er.message)});
     }
   }
 
   async read(req, res) {
-    const products = await ProductModel.findAll({attributes: ['id', 'name', 'price', 'description', 'quantity']});
+    const products = await ProductModel.findAll({attributes: ['id', 'name', 'price', 'description', 'quantity', 'image']});
     res.status(200).json(products);
   }
 
   async readOne(req, res){
     
     const {id} = req.params;
-    const product = await ProductModel.findByPk(id, {attributes: [ 'name', 'price', 'description', 'quantity']});
+    const product = await ProductModel.findByPk(id, {attributes: [ 'name', 'price', 'description', 'quantity', 'image']});
     if(!product){
       return res.status(400).json({message: "Produto não existe."});
     }
@@ -37,7 +37,7 @@ class ProductController {
       
         await ProductModel.update(productAtt, {where: {id}});
 
-        res.status(200).json({name:productAtt.name,price:productAtt.price,description:productAtt.description,quantity:productAtt.quantity});
+        res.status(200).json({id: id, name:productAtt.name, price:productAtt.price, description:productAtt.description, quantity:productAtt.quantity, image: productAtt.image});
       }
     catch(err){
         res.status(400).json({errors:err.errors.map(er=>er.message)})

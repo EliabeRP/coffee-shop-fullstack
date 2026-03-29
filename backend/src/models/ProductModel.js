@@ -53,6 +53,12 @@ export default class Product extends Model {
         }
         },
 
+        image: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: null,
+        },
+
     }, 
       { sequelize }
     );
