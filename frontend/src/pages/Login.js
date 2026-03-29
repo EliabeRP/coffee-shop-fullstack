@@ -1,14 +1,45 @@
 import React, { useState } from "react";
 import { Form, Button, Card, Container } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3333";
+
+
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle login logic here
+        const loginData = {
+            email,
+            password,
+        };
+        try {
+            const response = await fetch(`${API_URL}/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(loginData),
+            });
+
+            if (!response.ok) {
+                throw new Error("Falha ao fazer login");
+            }
+
+            const data = await response.json();
+            if (!data?.token) {
+                throw new Error("Token não retornado no login");
+            }
+
+            localStorage.setItem("token", data.token);
+            navigate("/");
+        } catch (error) {
+            console.error("Erro ao fazer login:", error);
+        }
     };
 
     return (
@@ -45,6 +76,7 @@ function Login() {
                         </Form.Group>
 
                         <Button
+                            onClick={handleSubmit}
                             type="submit"
                             className="w-100 border-0"
                             style={{ backgroundColor: "#D2691E" }}

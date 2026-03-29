@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import userRoutes from './src/routes/UserRoutes';
 import Login from './src/routes/index';
 import database from './src/database';
@@ -15,6 +16,11 @@ class App {
   }
 
   middlewares() {
+    this.app.use(cors({
+      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    }));
     this.app.use(express.json());
   }
 
