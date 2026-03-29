@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { FaShoppingCart, FaUser, FaSearch } from 'react-icons/fa';
-import './NavBar.css';
+import { FaShoppingCart, FaSearch } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import UserMenu from './UserMenu';
+import './NavBar.css';
 
 export default function NavBar() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -41,9 +42,7 @@ export default function NavBar() {
                 <button className="navbar-icon-btn" title="Carrinho">
                     <FaShoppingCart size={24} />
                 </button>
-                <button className="navbar-icon-btn" title="Perfil">
-                    <FaUser size={24} />
-                </button>
+                <UserMenu />
             </div>
         </nav>
     );
