@@ -1,8 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaShoppingCart, FaBolt } from 'react-icons/fa';
 import './ProductCard.css';
 
 export default function ProductCard({ product }) {
+    const navigate = useNavigate();
     const {
         id = 1,
         title = 'Nome do Produto',
@@ -11,18 +13,24 @@ export default function ProductCard({ product }) {
         image = 'https://via.placeholder.com/250x250?text=Produto'
     } = product || {};
 
-    const handleBuyNow = () => {
+    const handleProductClick = () => {
+        navigate(`/product/${id}`);
+    };
+
+    const handleBuyNow = (e) => {
+        e.stopPropagation();
         console.log('Comprar agora:', id);
     };
 
-    const handleAddToCart = () => {
+    const handleAddToCart = (e) => {
+        e.stopPropagation();
         console.log('Adicionar ao carrinho:', id);
     };
 
     const inStock = stock > 0;
 
     return (
-        <div className="product-card">
+        <div className="product-card" onClick={handleProductClick}>
             <div className="product-image">
                 <img src={image} alt={title} />
                 {!inStock && <div className="out-of-stock">Fora de Estoque</div>}
