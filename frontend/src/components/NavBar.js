@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaShoppingCart, FaSearch } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { Navbar, Container, Form, Button } from 'react-bootstrap';
 import UserMenu from './UserMenu';
 import './NavBar.css';
 
@@ -17,34 +18,43 @@ export default function NavBar() {
     };
 
     return (
-        <nav className="navbar">
-            <Link to="/" className="navbar-logo" style={{ textDecoration: "none"}}>
-                <div className="navbar-logo">
-                    <strong style={{ color: '#F5DEB3' }}>SQLATTE</strong>
+        <Navbar bg="custom" expand="lg" className="navbar-custom sticky-top">
+            <Container fluid>
+                <Navbar.Brand as={Link} to="/" className="navbar-logo">
+                    <strong style={{ color: '#F5DEB3', marginRight: '0.5rem' }}>SQLATTE</strong>
                     <img src="/cafezinho.png" alt="Logo Cafezinho" />
+                </Navbar.Brand>
+
+                <Form className="navbar-search flex-grow-1" onSubmit={handleSearchSubmit}>
+                    <div className="navbar-search-group">
+                        <Form.Control
+                            placeholder="Pesquisar produtos..."
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            className="search-input"
+                        />
+                        <Button 
+                            type="submit" 
+                            className="search-button"
+                            variant="none"
+                        >
+                            <FaSearch size={18} />
+                        </Button>
+                    </div>
+                </Form>
+
+                <div className="navbar-icons">
+                    <Button 
+                        className="navbar-icon-btn" 
+                        variant="none"
+                        title="Carrinho"
+                    >
+                        <FaShoppingCart size={24} />
+                    </Button>
+                    <UserMenu />
                 </div>
-            </Link>
-
-            <form className="navbar-search" onSubmit={handleSearchSubmit}>
-                <input
-                    type="text"
-                    placeholder="Pesquisar produtos..."
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    className="search-input"
-                />
-                <button type="submit" className="search-button">
-                    <FaSearch size={18} />
-                </button>
-            </form>
-
-            <div className="navbar-icons">
-                <button className="navbar-icon-btn" title="Carrinho">
-                    <FaShoppingCart size={24} />
-                </button>
-                <UserMenu />
-            </div>
-        </nav>
+            </Container>
+        </Navbar>
     );
 }
 

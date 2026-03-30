@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaShoppingCart, FaBolt, FaArrowLeft } from 'react-icons/fa';
+import { Container, Row, Col, Button, Spinner, Alert, Badge } from 'react-bootstrap';
 import NavBar from '../components/NavBar';
 import './ProductDetails.css';
 
@@ -57,9 +58,14 @@ export default function ProductDetails() {
         return (
             <div>
                 <NavBar />
-                <div className="product-details-container">
-                    <div className="loading">Carregando produto...</div>
-                </div>
+                <Container className="product-details-container">
+                    <div className="text-center py-5">
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Carregando...</span>
+                        </Spinner>
+                        <p className="mt-3">Carregando produto...</p>
+                    </div>
+                </Container>
             </div>
         );
     }
@@ -68,9 +74,11 @@ export default function ProductDetails() {
         return (
             <div>
                 <NavBar />
-                <div className="product-details-container">
-                    <div className="error">{error}</div>
-                </div>
+                <Container className="product-details-container">
+                    <Alert variant="danger" role="alert">
+                        {error}
+                    </Alert>
+                </Container>
             </div>
         );
     }
@@ -79,9 +87,11 @@ export default function ProductDetails() {
         return (
             <div>
                 <NavBar />
-                <div className="product-details-container">
-                    <div className="empty">Produto não encontrado</div>
-                </div>
+                <Container className="product-details-container">
+                    <Alert variant="warning" role="alert">
+                        Produto não encontrado
+                    </Alert>
+                </Container>
             </div>
         );
     }
@@ -91,18 +101,24 @@ export default function ProductDetails() {
     return (
         <div>
             <NavBar />
-            <div className="product-details-container">
-                <button className="back-button" onClick={goBack}>
+            <Container className="product-details-container py-5">
+                <Button 
+                    variant="none"
+                    className="back-button mb-4"
+                    onClick={goBack}
+                >
                     <FaArrowLeft /> Voltar
-                </button>
+                </Button>
 
-                <div className="product-details">
-                    <div className="product-details-image">
-                        <img src={product.image} alt={product.title} />
-                        {!inStock && <div className="out-of-stock">Fora de Estoque</div>}
-                    </div>
+                <Row className="product-details g-5">
+                    <Col md={6} lg={5} className="product-details-image-col">
+                        <div className="product-details-image">
+                            <img src={product.image} alt={product.title} />
+                            {!inStock && <div className="out-of-stock">Fora de Estoque</div>}
+                        </div>
+                    </Col>
                     
-                    <div className="product-details-info">
+                    <Col md={6} lg={7} className="product-details-info d-flex flex-column">
                         <h1 className="product-details-title">{product.title}</h1>
 
                         <div className="product-details-price">
@@ -112,36 +128,44 @@ export default function ProductDetails() {
                         <div className="product-details-stock">
                             <span className="label">Disponibilidade:</span>
                             <span className={`value ${inStock ? 'in-stock' : 'out-of-stock'}`}>
-                                {inStock ? `${product.stock} em estoque` : 'Fora de estoque'}
+                                {inStock ? (
+                                    <Badge bg="success">{product.stock} em estoque</Badge>
+                                ) : (
+                                    <Badge bg="danger">Fora de estoque</Badge>
+                                )}
                             </span>
                         </div>
 
-                        <div className="product-details-description">
-                            <h3>Descrição</h3>
-                            <p>{product.description}</p>
-                        </div>
+                        <Alert variant="light" className="product-details-description">
+                            <h5>Descrição</h5>
+                            <p className="mb-0">{product.description}</p>
+                        </Alert>
 
-                        <div className="product-details-actions">
-                            <button
+                        <div className="product-details-actions mt-auto gap-3 d-flex flex-column">
+                            <Button
                                 className="btn-buy-now"
                                 onClick={handleBuyNow}
                                 disabled={!inStock}
+                                variant="none"
+                                size="lg"
                             >
                                 <FaBolt size={18} />
                                 Comprar Agora
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 className="btn-add-cart"
                                 onClick={handleAddToCart}
                                 disabled={!inStock}
+                                variant="none"
+                                size="lg"
                             >
                                 <FaShoppingCart size={18} />
                                 Adicionar ao Carrinho
-                            </button>
+                            </Button>
                         </div>
-                    </div>
-                </div>
-            </div>
+                    </Col>
+                </Row>
+            </Container>
         </div>
     );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import ProductCard from "../components/ProductCard";
 import NavBar from "../components/NavBar";
 import './Home.css';
@@ -40,21 +41,39 @@ export default function Home(){
     return(
         <div>
             <NavBar />
-            <div className="home-container">
+            <Container fluid className="home-container py-5">
                 {loading ? (
-                    <div className="loading">Carregando produtos...</div>
-                ) : error ? (
-                    <div className="error">{error}</div>
-                ) : products.length === 0 ? (
-                    <div className="empty">Nenhum produto disponível</div>
-                ) : (
-                    <div className="products-grid">
-                        {products.map(product => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
+                    <div className="text-center py-5">
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Carregando produtos...</span>
+                        </Spinner>
+                        <p className="mt-3">Carregando produtos...</p>
                     </div>
+                ) : error ? (
+                    <Alert variant="danger" role="alert">
+                        {error}
+                    </Alert>
+                ) : products.length === 0 ? (
+                    <div className="text-center py-5 text-muted">
+                        <p>Nenhum produto disponível</p>
+                    </div>
+                ) : (
+                    <Row className="g-4 justify-content-center">
+                        {products.map(product => (
+                            <Col 
+                                key={product.id} 
+                                xs={12} 
+                                sm={6} 
+                                md={4} 
+                                lg={3}
+                                className="d-flex justify-content-center"
+                            >
+                                <ProductCard product={product} />
+                            </Col>
+                        ))}
+                    </Row>
                 )}
-            </div>
+            </Container>
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaShoppingCart, FaBolt } from 'react-icons/fa';
+import { Card, Button } from 'react-bootstrap';
 import './ProductCard.css';
 
 export default function ProductCard({ product }) {
@@ -30,16 +31,25 @@ export default function ProductCard({ product }) {
     const inStock = stock > 0;
 
     return (
-        <div className="product-card" onClick={handleProductClick}>
+        <Card 
+            className="product-card h-100"
+            onClick={handleProductClick}
+            style={{ cursor: 'pointer', width: '280px' }}
+        >
             <div className="product-image">
-                <img src={image} alt={title} />
+                <Card.Img 
+                    variant="top" 
+                    src={image} 
+                    alt={title}
+                    className="product-img"
+                />
                 {!inStock && <div className="out-of-stock">Fora de Estoque</div>}
             </div>
 
-            <div className="product-info">
-                <h3 className="product-title">{title}</h3>
+            <Card.Body className="product-info d-flex flex-column">
+                <Card.Title className="product-title">{title}</Card.Title>
 
-                <div className="product-details">
+                <div className="product-details mb-3">
                     <div className="product-price">
                         <span className="price-label">Preço</span>
                         <span className="price-value">R$ {price.toFixed(2)}</span>
@@ -52,27 +62,29 @@ export default function ProductCard({ product }) {
                     </div>
                 </div>
 
-                <div className="product-actions">
-                    <button
+                <div className="product-actions mt-auto d-flex flex-column gap-2">
+                    <Button
                         className="btn-buy-now"
                         onClick={handleBuyNow}
                         disabled={!inStock}
                         title="Comprar agora"
+                        variant="none"
                     >
                         <FaBolt size={16} />
                         Comprar
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         className="btn-add-cart"
                         onClick={handleAddToCart}
                         disabled={!inStock}
                         title="Adicionar ao carrinho"
+                        variant="none"
                     >
                         <FaShoppingCart size={16} />
                         Carrinho
-                    </button>
+                    </Button>
                 </div>
-            </div>
-        </div>
+            </Card.Body>
+        </Card>
     );
 }
