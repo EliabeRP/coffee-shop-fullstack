@@ -6,6 +6,7 @@ const router = Router();
 
 router.post('/order', auth.authClient, OrderController.create);
 router.get('/order', auth.authAdmin, OrderController.read);
+router.get('/my-orders', auth.authClient, OrderController.readByUser);
 router.get('/order/:id', auth.authClient, OrderController.readOne);
 router.put('/order/:id', auth.authClient, OrderController.update);
 router.delete('/order/:id', auth.authClient, OrderController.delete);
