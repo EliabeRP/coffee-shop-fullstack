@@ -25,6 +25,12 @@ export default class Order extends Model {
           allowNull: false,
         },
 
+        status: {
+          type: DataTypes.STRING,
+          allowNull: true,
+          defaultValue: null,
+        },
+
       },
       { sequelize }
     );

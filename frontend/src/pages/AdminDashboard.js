@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Table, Alert, Spinner, Button, Badge } from 'react-bootstrap';
-import { FaSyncAlt, FaUsers, FaBoxOpen, FaShoppingBag, FaDollarSign } from 'react-icons/fa';
+import { Container, Row, Col, Card, Table, Alert, Spinner, Button, Badge, ButtonGroup } from 'react-bootstrap';
+import { FaSyncAlt, FaUsers, FaBoxOpen, FaShoppingBag, FaDollarSign, FaCheck, FaTruck, FaClock } from 'react-icons/fa';
 import NavBar from '../components/NavBar';
 import { getUserRoleFromToken } from '../utils/auth';
 import './AdminDashboard.css';
@@ -56,6 +56,21 @@ export default function AdminDashboard() {
         }
     }, [navigate]);
 
+    const handleUpdateStatus = async (orderId, newStatus) => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.patch(`${API_URL}/order/${orderId}/status`, 
+                { status: newStatus }, 
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            fetchDashboardData(); 
+        } catch (err) {
+            alert('Erro ao atualizar status do pedido.');
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
         fetchDashboardData();
     }, [fetchDashboardData]);
@@ -73,6 +88,16 @@ export default function AdminDashboard() {
             style: 'currency',
             currency: 'BRL',
         });
+    };
+
+    const getStatusBadge = (status) => {
+        const variants = {
+            'pendente': 'warning',
+            'enviado': 'info',
+            'entregue': 'success',
+            'cancelado': 'danger'
+        };
+        return <Badge bg={variants[status?.toLowerCase()] || 'secondary'}>{status?.toUpperCase()}</Badge>;
     };
 
     if (loading) {
@@ -145,30 +170,22 @@ export default function AdminDashboard() {
                 </Row>
 
                 <Row className="g-4">
-                    <Col lg={6}>
+                    <Col lg={5}>
                         <Card className="admin-table-card h-100">
-                            <Card.Header className="table-title">Usuários Cadastrados</Card.Header>
+                            <Card.Header className="table-title">Usuários</Card.Header>
                             <Card.Body className="table-wrapper">
-                                <Table striped hover responsive>
+                                <Table striped hover responsive size="sm">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
                                             <th>Nome</th>
-                                            <th>Email</th>
                                             <th>Perfil</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {users.map((user) => (
                                             <tr key={user.id}>
-                                                <td>{user.id}</td>
                                                 <td>{user.name}</td>
-                                                <td>{user.email}</td>
-                                                <td>
-                                                    <Badge bg={user.role === 'admin' ? 'danger' : 'secondary'}>
-                                                        {user.role}
-                                                    </Badge>
-                                                </td>
+                                                <td><Badge bg={user.role === 'admin' ? 'danger' : 'secondary'}>{user.role}</Badge></td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -176,19 +193,14 @@ export default function AdminDashboard() {
                             </Card.Body>
                         </Card>
                     </Col>
-
-                    <Col lg={6}>
+                    <Col lg={7}>
                         <Card className="admin-table-card h-100">
-                            <Card.Header className="table-title d-flex justify-content-between align-items-center">
-                                <span>Produtos</span>
-                                <small className="text-muted">Estoque baixo: {lowStockProducts}</small>
-                            </Card.Header>
+                            <Card.Header className="table-title">Estoque de Produtos</Card.Header>
                             <Card.Body className="table-wrapper">
-                                <Table striped hover responsive>
+                                <Table striped hover responsive size="sm">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Nome</th>
+                                            <th>Produto</th>
                                             <th>Preço</th>
                                             <th>Qtd</th>
                                         </tr>
@@ -196,11 +208,10 @@ export default function AdminDashboard() {
                                     <tbody>
                                         {products.map((product) => (
                                             <tr key={product.id}>
-                                                <td>{product.id}</td>
                                                 <td>{product.name}</td>
                                                 <td>{formatCurrency(product.price)}</td>
                                                 <td>
-                                                    <Badge bg={Number(product.quantity) <= 5 ? 'warning' : 'success'} text={Number(product.quantity) <= 5 ? 'dark' : 'light'}>
+                                                    <Badge bg={Number(product.quantity) <= 5 ? 'warning' : 'success'}>
                                                         {product.quantity}
                                                     </Badge>
                                                 </td>
@@ -216,15 +227,16 @@ export default function AdminDashboard() {
                 <Row className="mt-4">
                     <Col>
                         <Card className="admin-table-card">
-                            <Card.Header className="table-title">Pedidos Recentes</Card.Header>
+                            <Card.Header className="table-title">Gerenciar Pedidos</Card.Header>
                             <Card.Body className="table-wrapper">
                                 <Table striped hover responsive>
                                     <thead>
                                         <tr>
                                             <th>Pedido</th>
                                             <th>Cliente (ID)</th>
-                                            <th>Itens</th>
                                             <th>Total</th>
+                                            <th>Status Atual</th>
+                                            <th className="text-center">Alterar Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -232,8 +244,33 @@ export default function AdminDashboard() {
                                             <tr key={order.id}>
                                                 <td>#{order.id}</td>
                                                 <td>{order.id_user}</td>
-                                                <td>{Array.isArray(order.products) ? order.products.length : 0}</td>
                                                 <td>{formatCurrency(order.total_price)}</td>
+                                                <td>{getStatusBadge(order.status)}</td>
+                                                <td className="text-center">
+                                                    <ButtonGroup size="sm">
+                                                        <Button 
+                                                            variant="outline-warning" 
+                                                            title="Pendente"
+                                                            onClick={() => handleUpdateStatus(order.id, 'pendente')}
+                                                        >
+                                                            <FaClock />
+                                                        </Button>
+                                                        <Button 
+                                                            variant="outline-info" 
+                                                            title="Enviado"
+                                                            onClick={() => handleUpdateStatus(order.id, 'enviado')}
+                                                        >
+                                                            <FaTruck />
+                                                        </Button>
+                                                        <Button 
+                                                            variant="outline-success" 
+                                                            title="Entregue"
+                                                            onClick={() => handleUpdateStatus(order.id, 'entregue')}
+                                                        >
+                                                            <FaCheck />
+                                                        </Button>
+                                                    </ButtonGroup>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>

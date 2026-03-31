@@ -58,7 +58,7 @@ class OrderController {
   }
 
   async read(req, res) {
-    const products = await OrderModel.findAll({ attributes: ['id', 'id_user', 'products', 'total_price'] });
+    const products = await OrderModel.findAll({ attributes: ['id', 'id_user', 'products', 'total_price', 'status'] });
     res.status(200).json(products);
   }
 
@@ -141,6 +141,25 @@ class OrderController {
       res.status(400).json({ errors: err.errors.map(er => er.message) });
     }
   }
+
+  async updateStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const order = await OrderModel.findByPk(id);
+    if (!order) return res.status(404).json({ message: 'Pedido não encontrado' });
+
+    await order.update({ status });
+
+    console.log(order.status);
+
+    return res.status(200).json({ message: 'Status atualizado com sucesso!', order });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Erro interno ao atualizar status.' });
+  }
+}
 
   async delete(req, res) {
     const { id } = req.params;

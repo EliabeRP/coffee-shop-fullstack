@@ -9,6 +9,7 @@ router.get('/my-orders', auth.authClient, OrderController.readByUser);
 router.get('/:id', auth.authClient, OrderController.readOne);
 router.post('/', auth.authClient, OrderController.create);
 router.put('/:id', auth.authClient, OrderController.update);
+router.patch('/:id/status', auth.authAdmin, OrderController.updateStatus);
 router.delete('/:id', auth.authClient, OrderController.delete);
 
 export default router;
