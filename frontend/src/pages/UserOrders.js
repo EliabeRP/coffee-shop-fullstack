@@ -25,7 +25,7 @@ export default function UserOrders() {
 
             try {
                 setLoading(true);
-                const response = await axios.get(`${API_URL}/my-orders`, {
+                const response = await axios.get(`${API_URL}/order/my-orders`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

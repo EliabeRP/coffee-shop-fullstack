@@ -25,10 +25,10 @@ class App {
   }
 
   routes() {
-    this.app.use(Login);
-    this.app.use(userRoutes);
-    this.app.use(productRoutes);
-    this.app.use(orderRoutes);
+    this.app.use('/login', Login);
+    this.app.use('/user', userRoutes);
+    this.app.use('/product', productRoutes);
+    this.app.use('/order', orderRoutes);
   }
 }
 
