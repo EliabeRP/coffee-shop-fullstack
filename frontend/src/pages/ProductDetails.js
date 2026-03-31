@@ -5,6 +5,7 @@ import { FaShoppingCart, FaBolt, FaArrowLeft } from 'react-icons/fa';
 import { Container, Row, Col, Button, Spinner, Alert, Badge } from 'react-bootstrap';
 import NavBar from '../components/NavBar';
 import './ProductDetails.css';
+import { addCartItem } from '../utils/cart';
 
 export default function ProductDetails() {
     const { id } = useParams();
@@ -19,7 +20,7 @@ export default function ProductDetails() {
                 setLoading(true);
                 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3333';
                 const response = await axios.get(`${apiUrl}/product/${id}`);
-                
+
                 const formattedProduct = {
                     id: id,
                     title: response.data.name,
@@ -28,7 +29,7 @@ export default function ProductDetails() {
                     stock: response.data.quantity,
                     image: response.data.image
                 };
-                
+
                 setProduct(formattedProduct);
                 setError(null);
             } catch (err) {
@@ -43,11 +44,15 @@ export default function ProductDetails() {
     }, [id]);
 
     const handleBuyNow = () => {
-        console.log('Comprar agora:', id);
+        if (!product) return;
+        addCartItem(product, 1);
+        navigate('/checkout');
     };
 
     const handleAddToCart = () => {
-        console.log('Adicionar ao carrinho:', id);
+        if (!product) return;
+        addCartItem(product, 1);
+        navigate('/cart');
     };
 
     const goBack = () => {
@@ -102,7 +107,7 @@ export default function ProductDetails() {
         <div>
             <NavBar />
             <Container className="product-details-container py-5">
-                <Button 
+                <Button
                     variant="none"
                     className="back-button mb-4"
                     onClick={goBack}
@@ -117,7 +122,7 @@ export default function ProductDetails() {
                             {!inStock && <div className="out-of-stock">Fora de Estoque</div>}
                         </div>
                     </Col>
-                    
+
                     <Col md={6} lg={7} className="product-details-info d-flex flex-column">
                         <h1 className="product-details-title">{product.title}</h1>
 

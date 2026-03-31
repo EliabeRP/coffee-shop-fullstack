@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { FaShoppingCart, FaSearch } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Navbar, Container, Form, Button } from 'react-bootstrap';
 import UserMenu from './UserMenu';
 import './NavBar.css';
+import { getCartCount } from '../utils/cart';
 
 export default function NavBar() {
     const [searchQuery, setSearchQuery] = useState('');
+    const [cartCount, setCartCount] = useState(0);
+    const location = useLocation();
+
+    useEffect(() => {
+        setCartCount(getCartCount());
+    }, [location.pathname]);
 
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
@@ -33,8 +41,8 @@ export default function NavBar() {
                             onChange={handleSearchChange}
                             className="search-input"
                         />
-                        <Button 
-                            type="submit" 
+                        <Button
+                            type="submit"
                             className="search-button"
                             variant="none"
                         >
@@ -44,12 +52,15 @@ export default function NavBar() {
                 </Form>
 
                 <div className="navbar-icons">
-                    <Button 
-                        className="navbar-icon-btn" 
+                    <Button
+                        as={Link}
+                        to="/cart"
+                        className="navbar-icon-btn"
                         variant="none"
                         title="Carrinho"
                     >
                         <FaShoppingCart size={24} />
+                        {cartCount > 0 && <span className="ms-2">{cartCount}</span>}
                     </Button>
                     <UserMenu />
                 </div>

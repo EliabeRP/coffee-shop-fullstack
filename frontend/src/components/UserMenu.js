@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dropdown, Button } from 'react-bootstrap';
-import { FaUser, FaSignOutAlt, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
+import { FaUser, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserEdit, FaChartLine } from 'react-icons/fa';
 import './UserMenu.css';
+import { getUserRoleFromToken } from '../utils/auth';
 
 export default function UserMenu() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [role, setRole] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         setIsLoggedIn(!!token);
+        setRole(getUserRoleFromToken(token));
     }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         setIsLoggedIn(false);
+        setRole(null);
         navigate('/');
     };
 
@@ -55,6 +59,22 @@ export default function UserMenu() {
                                 <FaUser size={16} />
                                 <span>Perfil</span>
                             </Dropdown.Item>
+                            <Dropdown.Item
+                                onClick={() => handleNavigation('/profile/edit')}
+                                className="user-menu-item"
+                            >
+                                <FaUserEdit size={16} />
+                                <span>Editar Perfil</span>
+                            </Dropdown.Item>
+                            {role === 'admin' && (
+                                <Dropdown.Item
+                                    onClick={() => handleNavigation('/admin')}
+                                    className="user-menu-item"
+                                >
+                                    <FaChartLine size={16} />
+                                    <span>Painel Admin</span>
+                                </Dropdown.Item>
+                            )}
                             <Dropdown.Divider />
                             <Dropdown.Item
                                 onClick={handleLogout}

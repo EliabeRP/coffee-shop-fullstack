@@ -1,15 +1,67 @@
 import React, { useState } from "react";
-import { Form, Button, Card, Container } from "react-bootstrap";
+import { Form, Button, Card, Container, Alert } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [name, setName] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle registration logic here
+        setError("");
+
+        // Validação básica
+        if (!name || !email || !password || !confirmPassword) {
+            setError("Todos os campos são obrigatórios");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setError("As senhas não combinam");
+            return;
+        }
+
+        if (password.length < 6) {
+            setError("A senha deve ter pelo menos 6 caracteres");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const response = await axios.post("http://localhost:3333/user", {
+                name,
+                email,
+                password,
+            });
+
+            if (response.status === 201 || response.data.token) {
+                // Se receber token, faz login automático
+                if (response.data.token) {
+                    localStorage.setItem("token", response.data.token);
+                    navigate("/");
+                } else {
+                    // Se não, redireciona para login
+                    navigate("/login");
+                }
+            }
+        } catch (err) {
+            if (err.response?.data?.message) {
+                setError(err.response.data.message);
+            } else if (err.response?.status === 409) {
+                setError("Este email já está cadastrado");
+            } else {
+                setError("Erro ao registrar. Tente novamente.");
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -21,6 +73,7 @@ function Register() {
             <Card className="shadow-sm" style={{ width: "100%", maxWidth: "420px" }}>
                 <Card.Body>
                     <Card.Title className="mb-4 text-center">Registro</Card.Title>
+                    {error && <Alert variant="danger">{error}</Alert>}
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3" controlId="formBasicName">
                             <Form.Label>Nome Completo</Form.Label>
@@ -69,8 +122,9 @@ function Register() {
                             type="submit"
                             className="w-100 border-0"
                             style={{ backgroundColor: "#D2691E" }}
+                            disabled={loading}
                         >
-                            Registrar
+                            {loading ? "Registrando..." : "Registrar"}
                         </Button>
                     </Form>
                 </Card.Body>

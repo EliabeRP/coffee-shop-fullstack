@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaShoppingCart, FaBolt } from 'react-icons/fa';
 import { Card, Button } from 'react-bootstrap';
 import './ProductCard.css';
+import { addCartItem } from '../utils/cart';
 
 export default function ProductCard({ product }) {
     const navigate = useNavigate();
@@ -20,26 +21,28 @@ export default function ProductCard({ product }) {
 
     const handleBuyNow = (e) => {
         e.stopPropagation();
-        console.log('Comprar agora:', id);
+        addCartItem({ id, title, price, image, stock }, 1);
+        navigate('/checkout');
     };
 
     const handleAddToCart = (e) => {
         e.stopPropagation();
-        console.log('Adicionar ao carrinho:', id);
+        addCartItem({ id, title, price, image, stock }, 1);
+        navigate('/cart');
     };
 
     const inStock = stock > 0;
 
     return (
-        <Card 
+        <Card
             className="product-card h-100"
             onClick={handleProductClick}
             style={{ cursor: 'pointer', width: '280px' }}
         >
             <div className="product-image">
-                <Card.Img 
-                    variant="top" 
-                    src={image} 
+                <Card.Img
+                    variant="top"
+                    src={image}
                     alt={title}
                     className="product-img"
                 />
