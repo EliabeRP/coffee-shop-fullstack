@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Container, Card, Button, Alert, Spinner } from 'react-bootstrap';
-import { FaArrowLeft, FaCreditCard } from 'react-icons/fa';
+import { Container, Card, Button, Alert, Spinner, Form } from 'react-bootstrap';
+import { FaArrowLeft, FaCreditCard, FaBarcode, FaMoneyBillWave, FaPix } from 'react-icons/fa';
 import NavBar from '../components/NavBar';
 import { clearCart, getCartItems } from '../utils/cart';
 import { getUserIdFromToken } from '../utils/auth';
@@ -15,6 +15,7 @@ export default function Checkout() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('');
 
     const items = getCartItems();
     const total = items.reduce((acc, item) => {
@@ -39,8 +40,15 @@ export default function Checkout() {
             return;
         }
 
+        if (!paymentMethod) {
+            setError('Por favor, selecione um método de pagamento.');
+            return;
+        }
+
         const payload = {
             id_user: userId,
+            payment_method: paymentMethod,
+            status: 'pendente',
             products: items.map((item) => ({
                 id: Number(item.id),
                 quantidade: Number(item.quantity),
@@ -100,37 +108,76 @@ export default function Checkout() {
                 {items.length === 0 ? (
                     <Alert variant="warning">Seu carrinho está vazio.</Alert>
                 ) : (
-                    <Card className="checkout-card shadow-sm">
-                        <Card.Body>
-                            <div className="summary-line">
-                                <span>Itens no pedido</span>
-                                <strong>{count}</strong>
-                            </div>
-                            <div className="summary-line total">
-                                <span>Total</span>
-                                <strong>R$ {total.toFixed(2)}</strong>
-                            </div>
+                    <div className="checkout-content">
+                        <Card className="checkout-card shadow-sm mb-4">
+                            <Card.Header className="bg-white border-bottom-0 pt-4 px-4">
+                                <h5 className="mb-0">Escolha o Método de Pagamento</h5>
+                            </Card.Header>
+                            <Card.Body className="px-4 pb-4">
+                                <Form>
+                                    <div className="payment-options d-flex flex-column gap-3">
+                                        <label className={`payment-option-card ${paymentMethod === 'credit_card' ? 'selected' : ''}`}>
+                                            <Form.Check
+                                                type="radio"
+                                                name="paymentMethod"
+                                                id="credit_card"
+                                                label={<span><FaCreditCard className="me-2" /> Cartão de Crédito</span>}
+                                                onChange={() => setPaymentMethod('credit_card')}
+                                            />
+                                        </label>
 
-                            {error && <Alert variant="danger" className="mt-3 mb-0">{error}</Alert>}
+                                        <label className={`payment-option-card ${paymentMethod === 'pix' ? 'selected' : ''}`}>
+                                            <Form.Check
+                                                type="radio"
+                                                name="paymentMethod"
+                                                id="pix"
+                                                label={<span><FaMoneyBillWave className="me-2" /> Pix</span>}
+                                                onChange={() => setPaymentMethod('pix')}
+                                            />
+                                        </label>
 
-                            <Button
-                                variant="none"
-                                className="finish-btn mt-4"
-                                onClick={handleFinishOrder}
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <>
-                                        <Spinner animation="border" size="sm" /> Processando...
-                                    </>
-                                ) : (
-                                    <>
-                                        <FaCreditCard /> Confirmar Pedido
-                                    </>
-                                )}
-                            </Button>
-                        </Card.Body>
-                    </Card>
+                                        <label className={`payment-option-card ${paymentMethod === 'boleto' ? 'selected' : ''}`}>
+                                            <Form.Check
+                                                type="radio"
+                                                name="paymentMethod"
+                                                id="boleto"
+                                                label={<span><FaBarcode className="me-2" /> Boleto Bancário</span>}
+                                                onChange={() => setPaymentMethod('boleto')}
+                                            />
+                                        </label>
+                                    </div>
+                                </Form>
+                            </Card.Body>
+                        </Card>
+
+                        <Card className="checkout-card shadow-sm">
+                            <Card.Body className="p-4">
+                                <div className="summary-line">
+                                    <span>Itens no pedido</span>
+                                    <strong>{count}</strong>
+                                </div>
+                                <div className="summary-line total border-top pt-3 mt-3">
+                                    <span>Total a pagar</span>
+                                    <strong className="fs-4 text-primary">R$ {total.toFixed(2)}</strong>
+                                </div>
+
+                                {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
+
+                                <Button
+                                    variant="none"
+                                    className="finish-btn mt-4 w-100"
+                                    onClick={handleFinishOrder}
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <><Spinner animation="border" size="sm" /> Processando...</>
+                                    ) : (
+                                        <><FaCreditCard /> Confirmar e Pagar</>
+                                    )}
+                                </Button>
+                            </Card.Body>
+                        </Card>
+                    </div>
                 )}
             </Container>
         </div>

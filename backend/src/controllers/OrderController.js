@@ -58,7 +58,7 @@ class OrderController {
   }
 
   async read(req, res) {
-    const products = await OrderModel.findAll({ attributes: ['id', 'id_user', 'products', 'total_price', 'status'] });
+    const products = await OrderModel.findAll({ attributes: ['id', 'id_user', 'products', 'total_price', 'payment_method', 'status'] });
     res.status(200).json(products);
   }
 
@@ -78,7 +78,7 @@ class OrderController {
     const { id } = req.params;
     const userId = req.user.id;
     const userRole = req.user.role;
-    const order = await OrderModel.findByPk(id, { attributes: ['id', 'id_user', 'products', 'total_price'] });
+    const order = await OrderModel.findByPk(id, { attributes: ['id', 'id_user', 'products', 'total_price', 'payment_method', 'status'] });
     if (!order) {
       return res.status(400).json({ message: "Pedido não existe." });
     }

@@ -31,6 +31,12 @@ export default class Order extends Model {
           defaultValue: null,
         },
 
+        payment_method: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          defaultValue: 'pix',
+        },
+
       },
       { sequelize }
     );
