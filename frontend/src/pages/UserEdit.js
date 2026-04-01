@@ -28,6 +28,9 @@ export default function UserEdit() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    
+    const [isFlamengo, setIsFlamengo] = useState(false);
+    const [assisteOnePiece, setAssisteOnePiece] = useState(false);
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -54,6 +57,9 @@ export default function UserEdit() {
 
                 setName(response.data.name || '');
                 setEmail(response.data.email || '');
+                setIsFlamengo(!!response.data.is_flamengo);
+                setAssisteOnePiece(!!response.data.assiste_one_piece);
+                
                 setError('');
             } catch (err) {
                 console.error('Erro ao carregar dados do usuário:', err);
@@ -77,6 +83,8 @@ export default function UserEdit() {
         const payload = {
             name,
             email,
+            is_flamengo: isFlamengo,
+            assiste_one_piece: assisteOnePiece
         };
 
         if (password.trim()) {
@@ -110,28 +118,26 @@ export default function UserEdit() {
         <div>
             <NavBar />
             <Container className="user-edit-page py-5">
-                <Button variant="none" className="back-button mb-4" onClick={() => navigate('/profile')}>
-                    <FaArrowLeft /> Voltar ao Perfil
+                <Button variant="none" className="back-button mb-4 p-0" onClick={() => navigate('/profile')}>
+                    <FaArrowLeft className="me-2" /> Voltar ao Perfil
                 </Button>
 
                 {loading ? (
                     <div className="text-center py-5">
-                        <Spinner animation="border" role="status">
-                            <span className="visually-hidden">Carregando dados...</span>
-                        </Spinner>
-                        <p className="mt-3">Carregando dados...</p>
+                        <Spinner animation="border" role="status" variant="primary" />
+                        <p className="mt-3">Carregando seus dados...</p>
                     </div>
                 ) : (
-                    <Card className="edit-card shadow-sm">
-                        <Card.Body>
-                            <Card.Title className="mb-4">Editar Perfil</Card.Title>
+                    <Card className="edit-card shadow-sm border-0">
+                        <Card.Body className="p-4">
+                            <Card.Title className="mb-4 fw-bold">Editar Perfil</Card.Title>
 
                             {error && <Alert variant="danger">{error}</Alert>}
                             {success && <Alert variant="success">{success}</Alert>}
 
                             <Form onSubmit={handleSubmit}>
                                 <Form.Group className="mb-3" controlId="editName">
-                                    <Form.Label>Nome</Form.Label>
+                                    <Form.Label className="fw-bold">Nome</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={name}
@@ -142,7 +148,7 @@ export default function UserEdit() {
                                 </Form.Group>
 
                                 <Form.Group className="mb-3" controlId="editEmail">
-                                    <Form.Label>Email</Form.Label>
+                                    <Form.Label className="fw-bold">Email</Form.Label>
                                     <Form.Control
                                         type="email"
                                         value={email}
@@ -152,24 +158,47 @@ export default function UserEdit() {
                                     />
                                 </Form.Group>
 
-                                <Form.Group className="mb-4" controlId="editPassword">
-                                    <Form.Label>Nova Senha (opcional)</Form.Label>
+                                <Form.Group className="mb-3" controlId="editPassword">
+                                    <Form.Label className="fw-bold">Nova Senha</Form.Label>
                                     <Form.Control
                                         type="password"
                                         value={password}
                                         onChange={(event) => setPassword(event.target.value)}
-                                        placeholder="Digite a nova senha"
+                                        placeholder="Deixe em branco para não alterar"
                                     />
                                 </Form.Group>
 
-                                <Button type="submit" variant="none" className="save-btn" disabled={saving}>
+                                <hr className="my-4" />
+                                <h6 className="mb-3 text-muted fw-bold">PREFERÊNCIAS</h6>
+
+                                <Form.Group className="mb-2">
+                                    <Form.Check 
+                                        type="checkbox"
+                                        id="edit-flamengo"
+                                        label="Torcedor do Flamengo"
+                                        checked={isFlamengo}
+                                        onChange={(e) => setIsFlamengo(e.target.checked)}
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-4">
+                                    <Form.Check 
+                                        type="checkbox"
+                                        id="edit-onepiece"
+                                        label="Assiste One Piece"
+                                        checked={assisteOnePiece}
+                                        onChange={(e) => setAssisteOnePiece(e.target.checked)}
+                                    />
+                                </Form.Group>
+
+                                <Button type="submit" variant="none" className="save-btn w-100 py-2" style={{ backgroundColor: "#D2691E", color: "white" }} disabled={saving}>
                                     {saving ? (
                                         <>
-                                            <Spinner size="sm" animation="border" /> Salvando...
+                                            <Spinner size="sm" animation="border" className="me-2" /> Salvando...
                                         </>
                                     ) : (
                                         <>
-                                            <FaSave /> Salvar Alterações
+                                            <FaSave className="me-2" /> Salvar Alterações
                                         </>
                                     )}
                                 </Button>

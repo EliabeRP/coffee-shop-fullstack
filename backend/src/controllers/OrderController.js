@@ -79,7 +79,7 @@ class OrderController {
 
     const orders = await OrderModel.findAll({
       where: { id_user: userId },
-      attributes: ['id', 'id_user', 'products', 'total_price', 'created_at'],
+      attributes: ['id', 'id_user', 'products', 'status', 'total_price', 'created_at'],
       order: [['created_at', 'DESC']],
     });
 
