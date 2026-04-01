@@ -13,14 +13,14 @@ class ProductController {
   }
 
   async read(req, res) {
-    const products = await ProductModel.findAll({attributes: ['id', 'name', 'price', 'description', 'quantity', 'image']});
+    const products = await ProductModel.findAll({attributes: ['id', 'name', 'price', 'description', 'quantity', 'image', 'category', 'origin']});
     res.status(200).json(products);
   }
 
   async readOne(req, res){
     
     const {id} = req.params;
-    const product = await ProductModel.findByPk(id, {attributes: [ 'name', 'price', 'description', 'quantity', 'image']});
+    const product = await ProductModel.findByPk(id, {attributes: [ 'name', 'price', 'description', 'quantity', 'image',  'category', 'origin']});
     if(!product){
       return res.status(400).json({message: "Produto não existe."});
     }

@@ -91,7 +91,7 @@ export default function UserOrders() {
                                     <div className="order-head mb-3">
                                         <div>
                                             <strong>Pedido #{order.id}</strong>
-                                            <p className="mb-0 text-muted">{formatDate(order.createdAt)}</p>
+                                            <p className="mb-0 text-muted">{formatDate(order.created_at)}</p>
                                         </div>
                                         <Badge bg="warning" text="dark" className="order-total">
                                             {formatCurrency(order.total_price)}

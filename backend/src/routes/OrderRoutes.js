@@ -5,6 +5,7 @@ import auth from "../middlewares/AuthMiddleware";
 const router = Router();
 
 router.get('/', auth.authAdmin, OrderController.read);
+router.get('/discount-report', auth.authAdmin, OrderController.discountReport);
 router.get('/my-orders', auth.authClient, OrderController.readByUser);
 router.get('/:id', auth.authClient, OrderController.readOne);
 router.post('/', auth.authClient, OrderController.create);

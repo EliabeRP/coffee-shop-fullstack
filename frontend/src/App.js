@@ -9,6 +9,7 @@ import UserOrders from './pages/UserOrders';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import AdminDashboard from './pages/AdminDashboard';
+import ProductForm from './components/ProductForm';
 
 function App() {
   return (
@@ -24,6 +25,8 @@ function App() {
         <Route path="/profile/edit" element={<UserEdit />} />
         <Route path="/profile/orders" element={<UserOrders />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/products/new" element={<ProductForm />} />
+        <Route path="/admin/products/edit/:id" element={<ProductForm />} />
       </Routes>
     </BrowserRouter>
   );

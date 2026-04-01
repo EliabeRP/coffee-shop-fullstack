@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Container, Card, Button, Alert, Spinner, Form } from 'react-bootstrap';
-import { FaArrowLeft, FaCreditCard, FaBarcode, FaMoneyBillWave, FaPix } from 'react-icons/fa';
+import { Container, Card, Button, Alert, Spinner, Form, Badge } from 'react-bootstrap';
+import { FaArrowLeft, FaCreditCard, FaBarcode, FaMoneyBillWave, FaCheckCircle, FaQrcode } from 'react-icons/fa';
 import NavBar from '../components/NavBar';
 import { clearCart, getCartItems } from '../utils/cart';
 import { getUserIdFromToken } from '../utils/auth';
@@ -16,9 +16,13 @@ export default function Checkout() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('');
+    
+    const [finalTotal, setFinalTotal] = useState(null);
+    const [discountApplied, setDiscountApplied] = useState(false);
 
     const items = getCartItems();
-    const total = items.reduce((acc, item) => {
+    
+    const totalOriginal = items.reduce((acc, item) => {
         return acc + (Number(item.price || 0) * Number(item.quantity || 0));
     }, 0);
 
@@ -58,14 +62,18 @@ export default function Checkout() {
         try {
             setLoading(true);
             setError('');
-            await axios.post(`${API_URL}/order`, payload, {
+            
+            const response = await axios.post(`${API_URL}/order`, payload, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
 
+            setFinalTotal(response.data.total_final);
+            setDiscountApplied(response.data.desconto_aplicado);
+            
             clearCart();
-            setSuccess('Pedido realizado com sucesso!');
+            setSuccess(response.data.message || 'Pedido realizado com sucesso!');
         } catch (err) {
             console.error('Erro ao finalizar pedido:', err);
             const apiMessage = err?.response?.data?.message;
@@ -76,20 +84,48 @@ export default function Checkout() {
         }
     };
 
+
     if (success) {
         return (
             <div>
                 <NavBar />
                 <Container className="checkout-page py-5">
-                    <Alert variant="success" className="mb-4">{success}</Alert>
-                    <div className="d-flex gap-3 flex-wrap">
-                        <Button variant="none" className="finish-btn" onClick={() => navigate('/profile/orders')}>
-                            Ver Histórico de Pedidos
-                        </Button>
-                        <Button variant="none" className="secondary-btn" onClick={() => navigate('/')}>
-                            Voltar para Home
-                        </Button>
-                    </div>
+                    <Card className="shadow border-0 p-4 text-center">
+                        <Card.Body>
+                            <FaCheckCircle size={60} className="text-success mb-4" />
+                            <h2 className="mb-3 text-success">Pedido Confirmado!</h2>
+                            <Alert variant="success" className="mb-4">
+                                {success}
+                            </Alert>
+
+                            {console.log('Desconto aplicado:', discountApplied)}
+
+                            {discountApplied && (
+                                <div className="discount-info mb-4">
+                                    <Badge bg="success" className="p-2 fs-6 mb-2">
+                                        🎉 10% DE DESCONTO APLICADO!
+                                    </Badge>
+                                    <p className="text-muted small">
+                                        Você recebeu este desconto por ser de Sousa, torcer pro Flamengo ou ser fã de One Piece!
+                                    </p>
+                                </div>
+                            )}
+
+                            <div className="total-display p-3 bg-light rounded mb-4">
+                                <span className="d-block text-muted small uppercase">Valor Final Pago</span>
+                                <strong className="display-6 text-dark">R$ {finalTotal}</strong>
+                            </div>
+
+                            <div className="d-flex gap-3 justify-content-center flex-wrap">
+                                <Button variant="none" className="finish-btn px-4" onClick={() => navigate('/profile/orders')}>
+                                    Ver Meus Pedidos
+                                </Button>
+                                <Button variant="none" className="secondary-btn px-4" onClick={() => navigate('/')}>
+                                    Voltar para Home
+                                </Button>
+                            </div>
+                        </Card.Body>
+                    </Card>
                 </Container>
             </div>
         );
@@ -111,7 +147,7 @@ export default function Checkout() {
                     <div className="checkout-content">
                         <Card className="checkout-card shadow-sm mb-4">
                             <Card.Header className="bg-white border-bottom-0 pt-4 px-4">
-                                <h5 className="mb-0">Escolha o Método de Pagamento</h5>
+                                <h5 className="mb-0">Método de Pagamento</h5>
                             </Card.Header>
                             <Card.Body className="px-4 pb-4">
                                 <Form>
@@ -131,7 +167,7 @@ export default function Checkout() {
                                                 type="radio"
                                                 name="paymentMethod"
                                                 id="pix"
-                                                label={<span><FaMoneyBillWave className="me-2" /> Pix</span>}
+                                                label={<span><FaQrcode className="me-2" /> Pix</span>}
                                                 onChange={() => setPaymentMethod('pix')}
                                             />
                                         </label>
@@ -152,27 +188,31 @@ export default function Checkout() {
 
                         <Card className="checkout-card shadow-sm">
                             <Card.Body className="p-4">
-                                <div className="summary-line">
-                                    <span>Itens no pedido</span>
-                                    <strong>{count}</strong>
+                                <div className="summary-line d-flex justify-content-between mb-2">
+                                    <span>Produtos ({count})</span>
+                                    <span>R$ {totalOriginal.toFixed(2)}</span>
                                 </div>
-                                <div className="summary-line total border-top pt-3 mt-3">
-                                    <span>Total a pagar</span>
-                                    <strong className="fs-4 text-primary">R$ {total.toFixed(2)}</strong>
+                                <div className="summary-line total border-top pt-3 mt-3 d-flex justify-content-between align-items-center">
+                                    <span className="fw-bold">Total Estimado</span>
+                                    <strong className="fs-4 text-primary">R$ {totalOriginal.toFixed(2)}</strong>
                                 </div>
+                                
+                                <p className="text-muted extra-small mt-2">
+                                    * Descontos de fidelidade e promoções regionais são aplicados após a confirmação.
+                                </p>
 
                                 {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
 
                                 <Button
                                     variant="none"
-                                    className="finish-btn mt-4 w-100"
+                                    className="finish-btn mt-4 w-100 py-3 fw-bold"
                                     onClick={handleFinishOrder}
                                     disabled={loading}
                                 >
                                     {loading ? (
                                         <><Spinner animation="border" size="sm" /> Processando...</>
                                     ) : (
-                                        <><FaCreditCard /> Confirmar e Pagar</>
+                                        <><FaCreditCard className="me-2" /> Confirmar Pagamento</>
                                     )}
                                 </Button>
                             </Card.Body>

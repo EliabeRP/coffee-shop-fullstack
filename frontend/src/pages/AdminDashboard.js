@@ -2,7 +2,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Table, Alert, Spinner, Button, Badge, ButtonGroup } from 'react-bootstrap';
-import { FaSyncAlt, FaUsers, FaBoxOpen, FaShoppingBag, FaDollarSign, FaCheck, FaTruck, FaClock } from 'react-icons/fa';
+import { 
+    FaSyncAlt, FaUsers, FaBoxOpen, FaShoppingBag, FaDollarSign, 
+    FaCheck, FaTruck, FaClock, FaList, FaPercent, FaEdit, FaTrash, FaExclamationTriangle 
+} from 'react-icons/fa';
 import NavBar from '../components/NavBar';
 import { getUserRoleFromToken } from '../utils/auth';
 import './AdminDashboard.css';
@@ -14,8 +17,12 @@ export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
     const [products, setProducts] = useState([]);
     const [orders, setOrders] = useState([]);
+    const [discountOrders, setDiscountOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    
+    const [filterDiscount, setFilterDiscount] = useState(false);
+    const [filterLowStock, setFilterLowStock] = useState(false);
 
     const fetchDashboardData = useCallback(async () => {
         const token = localStorage.getItem('token');
@@ -56,6 +63,32 @@ export default function AdminDashboard() {
         }
     }, [navigate]);
 
+    const fetchDiscountOrders = useCallback(async () => {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await axios.get(`${API_URL}/order/discount-report`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setDiscountOrders(response.data || []);
+        } catch (err) {
+            console.error('Erro ao buscar relatório de descontos:', err);
+        }
+    }, []);
+
+    const handleDeleteProduct = async (productId) => {
+        if (!window.confirm('Tem certeza que deseja excluir este produto?')) return;
+
+        const token = localStorage.getItem('token');
+        try {
+            await axios.delete(`${API_URL}/product/${productId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setProducts(products.filter(p => p.id !== productId));
+        } catch (err) {
+            alert('Erro ao excluir produto. Verifique dependências.');
+        }
+    };
+
     const handleUpdateStatus = async (orderId, newStatus) => {
         const token = localStorage.getItem('token');
         try {
@@ -63,11 +96,10 @@ export default function AdminDashboard() {
                 { status: newStatus }, 
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-
             fetchDashboardData(); 
+            if (filterDiscount) fetchDiscountOrders();
         } catch (err) {
             alert('Erro ao atualizar status do pedido.');
-            console.error(err);
         }
     };
 
@@ -75,13 +107,20 @@ export default function AdminDashboard() {
         fetchDashboardData();
     }, [fetchDashboardData]);
 
+    const filteredProducts = useMemo(() => {
+        if (filterLowStock) {
+            return products.filter(p => Number(p.quantity) <= 5);
+        }
+        return products;
+    }, [products, filterLowStock]);
+
+    const filteredOrders = useMemo(() => {
+        return filterDiscount ? discountOrders : orders;
+    }, [filterDiscount, orders, discountOrders]);
+
     const totalRevenue = useMemo(() => {
         return orders.reduce((acc, order) => acc + Number(order.total_price || 0), 0);
     }, [orders]);
-
-    const lowStockProducts = useMemo(() => {
-        return products.filter((product) => Number(product.quantity || 0) <= 5).length;
-    }, [products]);
 
     const formatCurrency = (value) => {
         return Number(value || 0).toLocaleString('pt-BR', {
@@ -92,10 +131,7 @@ export default function AdminDashboard() {
 
     const getStatusBadge = (status) => {
         const variants = {
-            'pendente': 'warning',
-            'enviado': 'info',
-            'entregue': 'success',
-            'cancelado': 'danger'
+            'pendente': 'warning', 'enviado': 'info', 'entregue': 'success', 'cancelado': 'danger'
         };
         return <Badge bg={variants[status?.toLowerCase()] || 'secondary'}>{status?.toUpperCase()}</Badge>;
     };
@@ -104,11 +140,9 @@ export default function AdminDashboard() {
         return (
             <div>
                 <NavBar />
-                <Container className="admin-dashboard-page py-5">
-                    <div className="text-center py-5">
-                        <Spinner animation="border" role="status" />
-                        <p className="mt-3">Carregando painel administrativo...</p>
-                    </div>
+                <Container className="py-5 text-center">
+                    <Spinner animation="border" />
+                    <p className="mt-3">Carregando painel administrativo...</p>
                 </Container>
             </div>
         );
@@ -118,74 +152,37 @@ export default function AdminDashboard() {
         <div>
             <NavBar />
             <Container fluid className="admin-dashboard-page py-4 px-4">
-                <div className="admin-head mb-4">
+                <div className="admin-head d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h1 className="admin-title">Painel de Controle</h1>
-                        <p className="text-muted mb-0">Visão geral da operação da loja</p>
+                        <p className="text-muted mb-0">Gestão de utilizadores, stock e vendas</p>
                     </div>
-                    <Button className="refresh-btn" variant="none" onClick={fetchDashboardData}>
-                        <FaSyncAlt /> Atualizar
+                    <Button variant="outline-primary" onClick={fetchDashboardData}>
+                        <FaSyncAlt className="me-2" /> Atualizar Dados
                     </Button>
                 </div>
 
                 {error && <Alert variant="danger">{error}</Alert>}
 
                 <Row className="g-3 mb-4">
-                    <Col md={6} lg={3}>
-                        <Card className="metric-card users">
-                            <Card.Body>
-                                <div className="metric-icon"><FaUsers /></div>
-                                <p className="metric-label">Usuários</p>
-                                <h3 className="metric-value">{users.length}</h3>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col md={6} lg={3}>
-                        <Card className="metric-card products">
-                            <Card.Body>
-                                <div className="metric-icon"><FaBoxOpen /></div>
-                                <p className="metric-label">Produtos</p>
-                                <h3 className="metric-value">{products.length}</h3>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col md={6} lg={3}>
-                        <Card className="metric-card orders">
-                            <Card.Body>
-                                <div className="metric-icon"><FaShoppingBag /></div>
-                                <p className="metric-label">Pedidos</p>
-                                <h3 className="metric-value">{orders.length}</h3>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col md={6} lg={3}>
-                        <Card className="metric-card revenue">
-                            <Card.Body>
-                                <div className="metric-icon"><FaDollarSign /></div>
-                                <p className="metric-label">Faturamento</p>
-                                <h3 className="metric-value">{formatCurrency(totalRevenue)}</h3>
-                            </Card.Body>
-                        </Card>
-                    </Col>
+                    <Col md={3}><Card className="metric-card bg-light border-0 shadow-sm"><Card.Body><div className="text-primary h4"><FaUsers /></div><small className="text-muted">Usuários</small><h3>{users.length}</h3></Card.Body></Card></Col>
+                    <Col md={3}><Card className="metric-card bg-light border-0 shadow-sm"><Card.Body><div className="text-success h4"><FaBoxOpen /></div><small className="text-muted">Produtos</small><h3>{products.length}</h3></Card.Body></Card></Col>
+                    <Col md={3}><Card className="metric-card bg-light border-0 shadow-sm"><Card.Body><div className="text-warning h4"><FaShoppingBag /></div><small className="text-muted">Pedidos</small><h3>{orders.length}</h3></Card.Body></Card></Col>
+                    <Col md={3}><Card className="metric-card bg-light border-0 shadow-sm"><Card.Body><div className="text-info h4"><FaDollarSign /></div><small className="text-muted">Faturamento</small><h3>{formatCurrency(totalRevenue)}</h3></Card.Body></Card></Col>
                 </Row>
 
                 <Row className="g-4">
-                    <Col lg={5}>
-                        <Card className="admin-table-card h-100">
-                            <Card.Header className="table-title">Usuários</Card.Header>
-                            <Card.Body className="table-wrapper">
-                                <Table striped hover responsive size="sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Nome</th>
-                                            <th>Perfil</th>
-                                        </tr>
-                                    </thead>
+                    <Col lg={4}>
+                        <Card className="admin-table-card border-0 shadow-sm">
+                            <Card.Header className="bg-white fw-bold">Usuários Registados</Card.Header>
+                            <Card.Body className="p-0">
+                                <Table hover responsive className="mb-0">
+                                    <thead className="table-light"><tr><th>Nome</th><th>Role</th></tr></thead>
                                     <tbody>
-                                        {users.map((user) => (
-                                            <tr key={user.id}>
-                                                <td>{user.name}</td>
-                                                <td><Badge bg={user.role === 'admin' ? 'danger' : 'secondary'}>{user.role}</Badge></td>
+                                        {users.map(u => (
+                                            <tr key={u.id}>
+                                                <td>{u.name}</td>
+                                                <td><Badge bg={u.role === 'admin' ? 'danger' : 'secondary'}>{u.role}</Badge></td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -193,82 +190,96 @@ export default function AdminDashboard() {
                             </Card.Body>
                         </Card>
                     </Col>
-                    <Col lg={7}>
-                        <Card className="admin-table-card h-100">
-                            <Card.Header className="table-title">Estoque de Produtos</Card.Header>
-                            <Card.Body className="table-wrapper">
-                                <Table striped hover responsive size="sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Produto</th>
-                                            <th>Preço</th>
-                                            <th>Qtd</th>
-                                        </tr>
+
+                    <Col lg={8}>
+                        <Card className="admin-table-card border-0 shadow-sm">
+                            <Card.Header className="bg-white d-flex justify-content-between align-items-center">
+                                <span className="fw-bold">Gestão de Stock</span>
+                                <ButtonGroup size="sm">
+                                    <Button 
+                                        variant={!filterLowStock ? "secondary" : "outline-secondary"} 
+                                        onClick={() => setFilterLowStock(false)}
+                                    >
+                                        Todos
+                                    </Button>
+                                    <Button 
+                                        variant={filterLowStock ? "danger" : "outline-danger"} 
+                                        onClick={() => setFilterLowStock(true)}
+                                    >
+                                        <FaExclamationTriangle className="me-1" /> Baixo Stock
+                                    </Button>
+                                </ButtonGroup>
+                            </Card.Header>
+                            <Card.Body className="p-0">
+                                <Table hover responsive className="mb-0">
+                                    <thead className="table-light">
+                                        <tr><th>Produto</th><th>Preço</th><th>Qtd</th><th className="text-center">Ações</th></tr>
                                     </thead>
                                     <tbody>
-                                        {products.map((product) => (
-                                            <tr key={product.id}>
-                                                <td>{product.name}</td>
-                                                <td>{formatCurrency(product.price)}</td>
+                                        {filteredProducts.map(p => (
+                                            <tr key={p.id}>
+                                                <td>{p.name}</td>
+                                                <td>{formatCurrency(p.price)}</td>
                                                 <td>
-                                                    <Badge bg={Number(product.quantity) <= 5 ? 'warning' : 'success'}>
-                                                        {product.quantity}
+                                                    <Badge bg={Number(p.quantity) <= 5 ? 'danger' : 'success'}>
+                                                        {p.quantity}
                                                     </Badge>
+                                                </td>
+                                                <td className="text-center">
+                                                    <ButtonGroup size="sm">
+                                                        <Button variant="outline-primary" onClick={() => navigate(`/admin/products/edit/${p.id}`)}><FaEdit /></Button>
+                                                        <Button variant="outline-danger" onClick={() => handleDeleteProduct(p.id)}><FaTrash /></Button>
+                                                    </ButtonGroup>
                                                 </td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </Table>
                             </Card.Body>
+                            <Card.Footer className="bg-white border-0 text-end">
+                                <Button size="sm" variant="success" onClick={() => navigate('/admin/products/new')}>+ Novo Produto</Button>
+                            </Card.Footer>
                         </Card>
                     </Col>
                 </Row>
 
                 <Row className="mt-4">
                     <Col>
-                        <Card className="admin-table-card">
-                            <Card.Header className="table-title">Gerenciar Pedidos</Card.Header>
-                            <Card.Body className="table-wrapper">
-                                <Table striped hover responsive>
-                                    <thead>
-                                        <tr>
-                                            <th>Pedido</th>
-                                            <th>Cliente (ID)</th>
-                                            <th>Total</th>
-                                            <th>Status Atual</th>
-                                            <th className="text-center">Alterar Status</th>
-                                        </tr>
+                        <Card className="admin-table-card border-0 shadow-sm">
+                            <Card.Header className="bg-white d-flex justify-content-between align-items-center">
+                                <span className="fw-bold">Pedidos</span>
+                                <ButtonGroup size="sm">
+                                    <Button 
+                                        variant={!filterDiscount ? "primary" : "outline-primary"} 
+                                        onClick={() => setFilterDiscount(false)}
+                                    >
+                                        <FaList className="me-1" /> Todos
+                                    </Button>
+                                    <Button 
+                                        variant={filterDiscount ? "success" : "outline-success"} 
+                                        onClick={() => { setFilterDiscount(true); fetchDiscountOrders(); }}
+                                    >
+                                        <FaPercent className="me-1" /> Com Desconto
+                                    </Button>
+                                </ButtonGroup>
+                            </Card.Header>
+                            <Card.Body className="p-0">
+                                <Table hover responsive className="mb-0">
+                                    <thead className="table-light">
+                                        <tr><th>ID</th><th>Cliente</th><th>Total</th><th>Status</th><th className="text-center">Alterar Status</th></tr>
                                     </thead>
                                     <tbody>
-                                        {orders.map((order) => (
-                                            <tr key={order.id}>
-                                                <td>#{order.id}</td>
-                                                <td>{order.id_user}</td>
-                                                <td>{formatCurrency(order.total_price)}</td>
-                                                <td>{getStatusBadge(order.status)}</td>
+                                        {filteredOrders.map(o => (
+                                            <tr key={o.pedido_id || o.id}>
+                                                <td>#{o.pedido_id || o.id}</td>
+                                                <td>{o.cliente_nome || `User ID: ${o.id_user}`}</td>
+                                                <td className="fw-bold">{formatCurrency(o.valor_final || o.total_price)}</td>
+                                                <td>{getStatusBadge(o.status)}</td>
                                                 <td className="text-center">
                                                     <ButtonGroup size="sm">
-                                                        <Button 
-                                                            variant="outline-warning" 
-                                                            title="Pendente"
-                                                            onClick={() => handleUpdateStatus(order.id, 'pendente')}
-                                                        >
-                                                            <FaClock />
-                                                        </Button>
-                                                        <Button 
-                                                            variant="outline-info" 
-                                                            title="Enviado"
-                                                            onClick={() => handleUpdateStatus(order.id, 'enviado')}
-                                                        >
-                                                            <FaTruck />
-                                                        </Button>
-                                                        <Button 
-                                                            variant="outline-success" 
-                                                            title="Entregue"
-                                                            onClick={() => handleUpdateStatus(order.id, 'entregue')}
-                                                        >
-                                                            <FaCheck />
-                                                        </Button>
+                                                        <Button variant="outline-warning" onClick={() => handleUpdateStatus(o.pedido_id || o.id, 'pendente')}><FaClock /></Button>
+                                                        <Button variant="outline-info" onClick={() => handleUpdateStatus(o.pedido_id || o.id, 'enviado')}><FaTruck /></Button>
+                                                        <Button variant="outline-success" onClick={() => handleUpdateStatus(o.pedido_id || o.id, 'entregue')}><FaCheck /></Button>
                                                     </ButtonGroup>
                                                 </td>
                                             </tr>

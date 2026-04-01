@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { FaShoppingCart, FaSearch } from 'react-icons/fa';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Navbar, Container, Form, Button } from 'react-bootstrap';
 import UserMenu from './UserMenu';
 import './NavBar.css';
@@ -11,6 +11,7 @@ export default function NavBar() {
     const [searchQuery, setSearchQuery] = useState('');
     const [cartCount, setCartCount] = useState(0);
     const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         setCartCount(getCartCount());
@@ -22,7 +23,7 @@ export default function NavBar() {
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        console.log('Pesquisa:', searchQuery);
+        navigate(`/?search=${searchQuery}`);
     };
 
     return (
