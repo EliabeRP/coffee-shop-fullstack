@@ -4,14 +4,14 @@ import auth from '../middlewares/AuthMiddleware';
 
 const router = new Router();
 
-router.get('/user',  auth.authAdmin, UserController.read);
+router.get('/',  auth.authAdmin, UserController.read);
 
-router.get('/user/:id', auth.authClient, UserController.readOne);
+router.get('/:id', auth.authClient, UserController.readOne);
 
-router.post('/user', UserController.create);
+router.post('/', UserController.create);
 
-router.put('/user/:id', auth.authClient, UserController.update);
+router.put('/:id', auth.authClient, UserController.update);
 
-router.delete('/user/:id',auth.authAdmin, UserController.delete);
+router.delete('/:id',auth.authAdmin, UserController.delete);
 
 export default router;

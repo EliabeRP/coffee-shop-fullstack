@@ -46,6 +46,16 @@ export default class User extends Model {
             msg: 'Role precisa ser admin ou client.',
           }
         }
+      },
+
+      is_flamengo: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      },
+
+      assiste_one_piece: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
       }
     }, 
       { sequelize }

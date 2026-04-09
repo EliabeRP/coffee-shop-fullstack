@@ -25,6 +25,18 @@ export default class Order extends Model {
           allowNull: false,
         },
 
+        status: {
+          type: DataTypes.STRING,
+          allowNull: true,
+          defaultValue: null,
+        },
+
+        payment_method: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          defaultValue: 'pix',
+        },
+
       },
       { sequelize }
     );

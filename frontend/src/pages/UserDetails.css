@@ -1,0 +1,83 @@
+.user-details-page {
+    max-width: 760px;
+}
+
+.profile-card {
+    border: 1px solid #e8dcc7;
+    border-radius: 16px;
+}
+
+.profile-card .card-title {
+    font-weight: 700;
+    color: #5a3114;
+}
+
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.95rem 0;
+    border-bottom: 1px solid #f1e7d7;
+}
+
+.profile-row:last-of-type {
+    border-bottom: none;
+}
+
+.profile-label {
+    font-weight: 600;
+    color: #8b5a2b;
+}
+
+.profile-value {
+    color: #2b2b2b;
+    text-align: right;
+    word-break: break-word;
+}
+
+.edit-profile-btn {
+    background-color: #d2691e !important;
+    border: none !important;
+    color: #fff !important;
+    font-weight: 600;
+    width: 100%;
+    padding: 0.8rem 1rem !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.edit-profile-btn:hover {
+    background-color: #bc5d1c !important;
+}
+
+.orders-history-btn {
+    background-color: #f5deb3 !important;
+    border: 1px solid #e2c08e !important;
+    color: #8b4513 !important;
+    font-weight: 600;
+    width: 100%;
+    padding: 0.8rem 1rem !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.orders-history-btn:hover {
+    background-color: #f0d896 !important;
+}
+
+@media (max-width: 576px) {
+    .profile-row {
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .profile-value {
+        text-align: left;
+    }
+}

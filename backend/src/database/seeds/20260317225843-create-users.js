@@ -1,10 +1,10 @@
 'use strict';
 
-const bcrypt  = require('bcryptjs');
+const bcrypt = require('bcryptjs');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
 
     await queryInterface.bulkInsert('users', [
       {
@@ -12,6 +12,8 @@ module.exports = {
         email: 'john@email.com',
         password_hash: await bcrypt.hash('12345678', 10),
         role: 'admin',
+        is_flamengo: true,
+        assiste_one_piece: false,
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -20,6 +22,8 @@ module.exports = {
         email: 'alice@email.com',
         password_hash: await bcrypt.hash('alicepass', 10),
         role: 'client',
+        is_flamengo: false,
+        assiste_one_piece: false,
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -28,6 +32,8 @@ module.exports = {
         email: 'bob@email.com',
         password_hash: await bcrypt.hash('bobpass123', 10),
         role: 'client',
+        is_flamengo: true,
+        assiste_one_piece: false,
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -36,14 +42,18 @@ module.exports = {
         email: 'carol@email.com',
         password_hash: await bcrypt.hash('carolpw1', 10),
         role: 'client',
+        is_flamengo: false,
+        assiste_one_piece: true,
         created_at: new Date(),
         updated_at: new Date(),
       },
       {
-        name: 'David Brown',
+        name: 'David Brown de Sousa',
         email: 'david@email.com',
         password_hash: await bcrypt.hash('davidpass', 10),
         role: 'client',
+        is_flamengo: false,
+        assiste_one_piece: false,
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -91,5 +101,7 @@ module.exports = {
 
   },
 
-  async down () { }
+  async down(queryInterface) {
+    await queryInterface.bulkDelete('users', null, {});
+  }
 };

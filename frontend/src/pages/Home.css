@@ -1,0 +1,37 @@
+.home-container {
+    padding: 2rem 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.spinner-border {
+    color: #D2691E;
+}
+
+.alert {
+    border-left: 4px solid;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.alert-danger {
+    background-color: #fadbd8 !important;
+    border-left-color: #e74c3c !important;
+    color: #e74c3c !important;
+}
+
+.text-muted {
+    color: #999 !important;
+}
+
+@media (max-width: 768px) {
+    .home-container {
+        padding: 1.5rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .home-container {
+        padding: 1rem 0.75rem;
+    }
+}
